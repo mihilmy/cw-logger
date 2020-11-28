@@ -1,0 +1,13 @@
+{
+  "name": "@mihilmy/cw-logger",
+  "version": "1.0.0",
+  "description": "Aggregated cloudwatch logs publisher",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "@mihilmy",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}
