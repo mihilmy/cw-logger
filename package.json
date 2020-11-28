@@ -4,7 +4,11 @@
   "description": "Aggregated cloudwatch logs publisher",
   "main": "index.js",
   "scripts": {},
-  "keywords": [],
+  "keywords": [
+    "aws",
+    "cloudwatch",
+    "frontend"
+  ],
   "author": "@mihilmy",
   "license": "MIT",
   "devDependencies": {
