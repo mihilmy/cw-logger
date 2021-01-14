@@ -1,3 +1,5 @@
+import { Aggregator } from "./Aggregator";
+
 export interface CloudWatchClientOptions {
   /**
    * CloudWatch Logs API Endpoint found from here: https://docs.aws.amazon.com/general/latest/gr/cwl_region.html
@@ -18,8 +20,6 @@ export interface ReporterOptions extends CloudWatchClientOptions {
 
   /**
    * Aggregates logs using a custom strategy based on clients desires
-   *
-   * TODO: Add the aggregator interface here for typing
    */
-  aggregator: any;
+  aggregator: Aggregator;
 }
