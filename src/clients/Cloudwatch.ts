@@ -48,6 +48,7 @@ export class CloudWatchClient {
       if (nextSequenceToken) this.sequenceToken = nextSequenceToken;
     } catch (error) {
       const response = { status: error.response?.status, body: error.response?.data };
+      console.debug("PutLogEventsRequest error: ", error.name, error.message);
       console.debug("PutLogEventsRequest failed with %o", response);
     }
   }
@@ -65,11 +66,12 @@ export class CloudWatchClient {
       const httpRequest = new BaseLogRequest(this.logsEndpoint, "CreateLogStream", createStreamRequest);
       await this.doRequest(httpRequest);
 
-      // Update the current log stream only when the
+      // Update the current log stream only when the request succeeds
       this.currentLogStream = logStreamName;
     } catch (error) {
       const response = { status: error.response?.status, body: error.response?.data };
-      console.debug("PutLogEventsRequest failed with %o", response);
+      console.debug("UpdateLogStream error: ", error.name, error.message);
+      console.debug("UpdateLogStream failed with %o", response);
     }
   }
 

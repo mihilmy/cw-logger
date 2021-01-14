@@ -4,5 +4,5 @@ module.exports = {
   semi: true,
   singleQuote: false,
   poseWrap: "always",
-  printWidth: 120,
+  printWidth: 240
 };

@@ -11,3 +11,12 @@ Library allows users to aggregate metrics and raw logs using the Embedded Metric
 1. Can not span more than 24 hours.
 1. The log events in the batch must be in chronological order by their timestamp
 1. 5 TPS hard limit on sending logs to a log group.
+
+
+## API Action
+
+An API action allows the users to record the API calls using the values below as an example:
+
+ * Dimension: Endpoint="/GetUsers", ResponseCode="200" | MetricName: StatusCode |  MetricValue: 1 | Unit: Count
+ * Dimension: Endpoint="/GetUsers" | MetricName: Latency |  MetricValue: 500 | Unit: Milliseconds
+
