@@ -1,8 +1,12 @@
 import { CloudWatchClient } from "../clients/Cloudwatch";
-import { Aggregator } from "../types/Aggregator";
 
+import { Aggregator } from "../types/Aggregator";
 import { ReporterOptions } from "../types/Options";
 
+/**
+ * Simple logs reporter that will send the logs to cloudwatch, if the logs follow the EmbeddedMetricFormat standard then they will be transformed
+ * into metrics by cloudwatch. Recommend using the aggregator to extend functionality not already provided by the basic implementation.
+ */
 export class BasicReporter {
   private frequency: number;
   private cloudwatch: CloudWatchClient;
@@ -15,6 +19,12 @@ export class BasicReporter {
     this.aggregator = options.aggregator;
   }
 
+  /**
+   * Starts reporting by setting up a log stream using the session name provided. Proceeding to setting up a continuous poller that will
+   * fetch seek the logs from the aggregator every flush frequency and will issue a put logs request.
+   *
+   * @param sessionName Name of the session where all of the users logs will end up
+   */
   async startReporting(sessionName: string) {
     // Create a unique log stream name by using the combination of the date and the user friendly name provided
     const [year, month, day, hours, minutes, seconds, millis] = new Date().toISOString().split(/[-:.TZ]/);
@@ -28,10 +38,16 @@ export class BasicReporter {
     console.debug("Starting session reporter using log stream name", logStreamName);
   }
 
+  /**
+   * Stops the reporting by clearing the interval being run
+   */
   stopReporting() {
     clearInterval(this.poller);
   }
 
+  /**
+   * Flushes the stored local logs if any exist to CloudWatch
+   */
   flush() {
     const logs = [...this.aggregator.getLogs()];
     this.aggregator.clear();
