@@ -8,6 +8,7 @@ lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+.DS_Store
 
 # Runtime data
 pids
@@ -36,6 +37,7 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
+lib
 
 # Dependency directories
 node_modules/

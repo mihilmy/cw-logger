@@ -3,10 +3,13 @@
     "lib": ["ES2019", "DOM"],
     "module": "CommonJS",
     "target": "ES2017",
+    "outDir": "lib",
 
     "strict": true,
+    "declaration": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false
-  }
+  },
+  "include": ["src/**/*.ts"]
 }
