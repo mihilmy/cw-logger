@@ -1,10 +1,6 @@
-import {
-  CreateLogStreamRequest,
-  InputLogEvent,
-  PutLogEventsRequest,
-  PutLogEventsResponse
-} from "aws-sdk/clients/cloudwatchlogs";
-import axios, { AxiosRequestConfig } from "axios";
+import { CreateLogStreamRequest, InputLogEvent, PutLogEventsRequest, PutLogEventsResponse } from "aws-sdk/clients/cloudwatchlogs";
+import axios, { AxiosRequestConfig, AxiosError } from "axios";
+import { BackOffPolicy, Retryable } from "typescript-retry-decorator";
 
 import { CloudWatchClientOptions } from "../types/Options";
 import { BaseLogRequest, MetricsRequest } from "../types/Cloudwatch";
@@ -47,9 +43,7 @@ export class CloudWatchClient {
       // Update the sequence token for the next call
       if (nextSequenceToken) this.sequenceToken = nextSequenceToken;
     } catch (error) {
-      const response = { status: error.response?.status, body: error.response?.data };
-      console.debug("PutLogEventsRequest error: ", error.name, error.message);
-      console.debug("PutLogEventsRequest failed with %o", response);
+      console.debug("PutLogEvents", error);
     }
   }
 
@@ -58,7 +52,7 @@ export class CloudWatchClient {
    *
    * @param logStreamName name of the log stream
    */
-  async updateLogStream(logStreamName: string): Promise<void> {
+  async updateLogStream(logStreamName: string): Promise<boolean> {
     const createStreamRequest: CreateLogStreamRequest = { logGroupName: this.logGroupName, logStreamName };
 
     try {
@@ -68,10 +62,10 @@ export class CloudWatchClient {
 
       // Update the current log stream only when the request succeeds
       this.currentLogStream = logStreamName;
+      return true;
     } catch (error) {
-      const response = { status: error.response?.status, body: error.response?.data };
-      console.debug("UpdateLogStream error: ", error.name, error.message);
-      console.debug("UpdateLogStream failed with %o", response);
+      console.debug("UpdateLogStream", error);
+      return false;
     }
   }
 
@@ -80,8 +74,17 @@ export class CloudWatchClient {
    *
    * @param request
    */
+  @Retryable({ backOff: 5000, maxAttempts: 10, doRetry: isRetryable })
   private async doRequest<Response>(request: AxiosRequestConfig) {
     const { data } = await axios(request);
     return data as Response;
   }
+}
+
+function isRetryable(e: AxiosError) {
+  const response = { status: e.response?.status, body: e.response?.data };
+  const action = e.response?.config?.headers["X-Amz-Target"];
+  console.debug(`${action} failed with`, response);
+
+  return e.response?.status! >= 500;
 }
