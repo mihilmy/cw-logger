@@ -43,7 +43,7 @@ export class CloudWatchClient {
       // Update the sequence token for the next call
       if (nextSequenceToken) this.sequenceToken = nextSequenceToken;
     } catch (error) {
-      console.debug("PutLogEvents", error);
+      logError(error);
     }
   }
 
@@ -64,7 +64,7 @@ export class CloudWatchClient {
       this.currentLogStream = logStreamName;
       return true;
     } catch (error) {
-      console.debug("UpdateLogStream", error);
+      logError(error);
       return false;
     }
   }
@@ -82,9 +82,16 @@ export class CloudWatchClient {
 }
 
 function isRetryable(e: AxiosError) {
+  return e.response?.status! >= 500;
+}
+
+function logError(e: AxiosError) {
+  if (!e.isAxiosError) {
+    return console.debug("Request failed due to", e);
+  }
+
   const response = { status: e.response?.status, body: e.response?.data };
   const action = e.response?.config?.headers["X-Amz-Target"];
-  console.debug(`${action} failed with`, response);
-
-  return e.response?.status! >= 500;
+  console.debug(`${action} request`, e.response?.config.data);
+  console.debug(`${action} response`, response);
 }

@@ -33,7 +33,7 @@ export class BasicReporter {
     // Update the log stream name within the application
     const success = await this.cloudwatch.updateLogStream(logStreamName);
     if (!success) {
-      return console.debug("Failed to start reporting logs, error during creating log stream");
+      return console.debug("Failed to start reporting logs, error was during log stream creation 😢");
     }
 
     // Start the poller that will flush the logs every N seconds to cloudwatch to the specified log stream
