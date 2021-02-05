@@ -23,3 +23,10 @@ export interface ReporterOptions extends CloudWatchClientOptions {
    */
   aggregator: Aggregator;
 }
+
+export interface LambdaReporterOptions {
+  /**
+   * Default namespace that can be overridden individually by any action emitted
+   */
+  namespace: string;
+}
