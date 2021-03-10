@@ -1,6 +1,6 @@
 {
   "name": "@mihilmy/cw-logger",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Aggregated cloudwatch logs publisher",
   "main": "lib/index.js",
   "scripts": {
@@ -10,7 +10,10 @@
   "keywords": [
     "aws",
     "cloudwatch",
-    "frontend"
+    "frontend",
+    "backend",
+    "lambda",
+    "metrics"
   ],
   "author": "@mihilmy",
   "license": "MIT",

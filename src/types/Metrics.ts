@@ -25,7 +25,7 @@ export class EmbeddedMetric {
   _aws: MetricMetadata;
   [refKey: string]: any;
 
-  constructor(props: { metrics: Metric[]; namespace: string; context?: Record<string, any> }) {
+  constructor(props: { metrics: Metric<string>[]; namespace: string; context?: Record<string, any> }) {
     this._aws = new MetricMetadata(this, props.metrics, props.namespace);
 
     for (const [contextKey, contextValue] of Object.entries(props.context || {})) {
@@ -46,7 +46,7 @@ export class MetricMetadata {
    */
   CloudWatchMetrics: MetricDirective[];
 
-  constructor(emfObject: EmbeddedMetric, metrics: Metric[], namespace: string) {
+  constructor(emfObject: EmbeddedMetric, metrics: Metric<string>[], namespace: string) {
     this.Timestamp = metrics[0]?.timestamp?.getTime() ?? Date.now();
     this.CloudWatchMetrics = metrics.map((metric) => new MetricDirective(emfObject, metric, namespace));
   }
@@ -73,7 +73,7 @@ export class MetricDirective {
    */
   Metrics: MetricDefinition[];
 
-  constructor(emfObject: EmbeddedMetric, metric: Metric, namespace: string) {
+  constructor(emfObject: EmbeddedMetric, metric: Metric<string>, namespace: string) {
     const { name, unit, value, dimensions = {} } = metric;
     this.Namespace = metric.namespace ?? namespace;
     this.Metrics = [{ Name: name, Unit: unit }];

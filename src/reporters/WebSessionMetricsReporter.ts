@@ -7,7 +7,7 @@ import { ReporterOptions } from "../types/Options";
  * Simple logs reporter that will send the logs to cloudwatch, if the logs follow the EmbeddedMetricFormat standard then they will be transformed
  * into metrics by cloudwatch. Recommend using the aggregator to extend functionality not already provided by the basic implementation.
  */
-export class BasicReporter {
+export class WebSessionMetricsReporter {
   private frequency: number;
   private cloudwatch: CloudWatchClient;
   private aggregator: Aggregator;

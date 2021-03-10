@@ -1,9 +1,6 @@
 import * as nock from "nock";
 
-import { BasicAggregator } from "../src/aggregators/BasicAggregator";
-import { BasicReporter } from "../src/reporters/BasicReporter";
-import { InterAction } from "../src/types/actions/InterAction";
-
+import { BasicAggregator, WebSessionMetricsReporter, InterAction } from "../src";
 import { sleep } from "./TestUtils";
 
 const flushFrequency = 5;
@@ -21,7 +18,7 @@ nock(logsEndpoint).persist().post("/").reply(200, { nextSequenceToken: "nextToke
 test("T1: Validate end to end workflow", async () => {
   const aggregator = new BasicAggregator({ namespace: "WebsiteMetrics" });
   //prettier-ignore
-  const reporter = new BasicReporter({ aggregator, logsEndpoint, logGroupName, flushFrequency });
+  const reporter = new WebSessionMetricsReporter({ aggregator, logsEndpoint, logGroupName, flushFrequency });
   reporter.startReporting("mihilmy");
 
   // Populate some actions into our aggregator
