@@ -6,9 +6,6 @@ export * from "./aggregators/BasicAggregator";
 // Exporting all the types needed by the users
 export * from "./types/Options";
 export * from "./types/Metrics";
-export * from "./types/actions/Action";
-export * from "./types/actions/APIAction";
-export * from "./types/actions/InterAction";
 
 // Exporting miscellaneous useful components
 export * from "./misc/Timer";

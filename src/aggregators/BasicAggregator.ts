@@ -1,7 +1,6 @@
 import { InputLogEvent } from "aws-sdk/clients/cloudwatchlogs";
 
-import { Aggregator, AggregatorOptions } from "../types/Aggregator";
-import { Action } from "../types/actions/Action";
+import { Aggregator } from "../types/Aggregator";
 import { EmbeddedMetric } from "../types/Metrics";
 
 /**
@@ -9,8 +8,6 @@ import { EmbeddedMetric } from "../types/Metrics";
  */
 export class BasicAggregator implements Aggregator {
   private store: InputLogEvent[] = [];
-
-  constructor(private options: AggregatorOptions) {}
 
   getLogs(): InputLogEvent[] {
     return this.store;
@@ -20,14 +17,7 @@ export class BasicAggregator implements Aggregator {
     this.store = [];
   }
 
-  async addAction(action: Action) {
-    const appMetrics = await action.emit();
-    const embeddedMetrics = new EmbeddedMetric({
-      metrics: appMetrics,
-      namespace: this.options.namespace,
-      context: action.context
-    });
-
+  aggregate(embeddedMetrics: EmbeddedMetric): void {
     this.store.push({ timestamp: Date.now(), message: JSON.stringify(embeddedMetrics) });
   }
 }

@@ -1,11 +1,5 @@
 import { LambdaMetricsReporter, Timer } from "../src";
-
-enum SpotifyPlayerMetrics {
-  CurrentStreams = "CurrentStreams",
-  AlbumClicks = "AlbumClicks",
-  SessionLength = "SessionLength",
-  BufferLatency = "BufferLatency"
-}
+import { SpotifyPlayerMetrics } from "./TestUtils";
 
 // This can be defined in a shared file and used between the application
 const MetricsReporter = new LambdaMetricsReporter<SpotifyPlayerMetrics>({ namespace: "Spotify/Player" });

@@ -2,21 +2,25 @@ import { CloudWatchClient } from "../clients/Cloudwatch";
 
 import { Aggregator } from "../types/Aggregator";
 import { ReporterOptions } from "../types/Options";
+import { Timer } from "../misc/Timer";
+import { EmbeddedMetric, Metric, MetricNames } from "../types/Metrics";
 
 /**
  * Simple logs reporter that will send the logs to cloudwatch, if the logs follow the EmbeddedMetricFormat standard then they will be transformed
  * into metrics by cloudwatch. Recommend using the aggregator to extend functionality not already provided by the basic implementation.
  */
-export class WebSessionMetricsReporter {
-  private frequency: number;
+export class WebSessionMetricsReporter<MetricName extends string = MetricNames> {
+  private readonly frequency: number;
   private cloudwatch: CloudWatchClient;
   private aggregator: Aggregator;
   private poller: any;
+  private namespace: string;
 
   constructor(options: ReporterOptions) {
     this.frequency = options.flushFrequency * 1000;
     this.cloudwatch = new CloudWatchClient(options);
     this.aggregator = options.aggregator;
+    this.namespace = options.namespace;
   }
 
   /**
@@ -54,6 +58,31 @@ export class WebSessionMetricsReporter {
   flush() {
     const logs = [...this.aggregator.getLogs()];
     this.aggregator.clear();
-    this.cloudwatch.putLogs(logs);
+    return this.cloudwatch.putLogs(logs);
+  }
+
+  addCount(metricName: MetricName, count: number = 1, context: Record<string, any> = {}) {
+    return this.addMetric({ name: metricName, value: count, unit: "Count" }, context);
+  }
+
+  addDuration(metricName: MetricName, duration: number, context: Record<string, any> = {}) {
+    return this.addMetric({ name: metricName, value: duration, unit: "Milliseconds" }, context);
+  }
+
+  addTime(metricName: MetricName, timer: Timer, context: Record<string, any> = {}) {
+    return this.addDuration(metricName, timer.stop(), context);
+  }
+
+  addMetric(metric: Metric<MetricName>, context: Record<string, any> = {}) {
+    return this.addMetrics([metric], context);
+  }
+
+  addMetrics(metricsList: Metric<MetricName>[], context: Record<string, any> = {}) {
+    // Create an embedded metric
+    const embeddedMetric = new EmbeddedMetric({ metrics: metricsList, namespace: this.namespace , context });
+    // Aggregate the data to be sent to cloudwatch during the flush cycle
+    this.aggregator.aggregate(embeddedMetric);
+
+    return this;
   }
 }

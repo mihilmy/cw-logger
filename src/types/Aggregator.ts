@@ -1,4 +1,5 @@
 import { InputLogEvent } from "aws-sdk/clients/cloudwatchlogs";
+import { EmbeddedMetric } from "./Metrics";
 
 export interface Aggregator {
   /**
@@ -10,11 +11,11 @@ export interface Aggregator {
    * Clears the current stored logs to make room for more logs
    */
   clear(): void;
-}
 
-export interface AggregatorOptions {
   /**
-   * Common metrics namespace that is used if none is provided by the action
+   * Aggregates metrics in internal data structures, depending on metric throughput some may require complex stateful aggregation
+   *
+   * @param embeddedMetrics
    */
-  namespace: string;
+  aggregate(embeddedMetrics: EmbeddedMetric): void;
 }

@@ -1,6 +1,6 @@
 {
   "name": "@mihilmy/cw-logger",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Aggregated cloudwatch logs publisher",
   "main": "lib/index.js",
   "scripts": {
