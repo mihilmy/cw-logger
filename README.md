@@ -63,13 +63,7 @@ logs and this will generate a metric in cloudwatch backend.
 
 ```typescript
 // Add this to a shared script that multiple consumers can use
-const reporter = new LambdaMetricsReporter<BackendAPIMetrics>({
-  namespace: "WebsiteMetrics",
-  aggregator: new BasicAggregator(),
-  logsEndpoint,
-  logGroupName,
-  flushFrequency
-});
+const reporter = new LambdaMetricsReporter<BackendAPIMetrics>({  namespace: "BackendMetrics" });
 
 reporter.addCount("XApiInvocations", 1); // One liner!!
 ```
