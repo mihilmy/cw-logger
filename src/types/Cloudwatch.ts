@@ -31,4 +31,5 @@ export class MetricsRequest extends BaseLogRequest<PutLogEventsRequest> {
   }
 }
 
-export type Action = "CreateLogStream" | "PutLogEvents";
+export type Action = "CreateLogStream" | "PutLogEvents" | "CreateLogGroup";
+export type CloudwatchException = "InvalidParameterException" | "ResourceAlreadyExistsException" | "ResourceNotFoundException" | "ServiceUnavailableException";

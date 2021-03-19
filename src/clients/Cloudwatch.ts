@@ -1,15 +1,15 @@
-import { CreateLogStreamRequest, InputLogEvent, PutLogEventsRequest, PutLogEventsResponse } from "aws-sdk/clients/cloudwatchlogs";
-import axios, { AxiosRequestConfig, AxiosError } from "axios";
-import { BackOffPolicy, Retryable } from "typescript-retry-decorator";
+import { CreateLogGroupRequest, CreateLogStreamRequest, InputLogEvent, PutLogEventsRequest, PutLogEventsResponse } from "aws-sdk/clients/cloudwatchlogs";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import { Retryable } from "typescript-retry-decorator";
 
 import { CloudWatchClientOptions } from "../types/Options";
-import { BaseLogRequest, MetricsRequest } from "../types/Cloudwatch";
+import { BaseLogRequest, CloudwatchException, MetricsRequest } from "../types/Cloudwatch";
 
 export class CloudWatchClient {
-  private logsEndpoint: string;
-  private logGroupName: string;
+  private readonly logsEndpoint: string;
+  private readonly logGroupName: string;
   private sequenceToken?: string;
-  private currentLogStream!: string;
+  private currentLogStream: string;
 
   constructor(options: CloudWatchClientOptions) {
     this.logGroupName = options.logGroupName;
@@ -64,8 +64,23 @@ export class CloudWatchClient {
       this.currentLogStream = logStreamName;
       return true;
     } catch (error) {
-      logError(error);
-      return false;
+      return this.handleUpdateLogStreamError(error, logStreamName);
+    }
+  }
+
+  /**
+   * Creates a log group in case one does not already exist
+   */
+  async createLogGroup(): Promise<boolean> {
+    const createLogGroupRequest: CreateLogGroupRequest = { logGroupName: this.logGroupName };
+
+    try {
+      // Perform the http request and await the next sequence token
+      const httpRequest = new BaseLogRequest(this.logsEndpoint, "CreateLogGroup", createLogGroupRequest);
+      await this.doRequest(httpRequest);
+      return true;
+    } catch (error) {
+      return this.handleCreateLogGroupError(error);
     }
   }
 
@@ -78,6 +93,46 @@ export class CloudWatchClient {
   private async doRequest<Response>(request: AxiosRequestConfig) {
     const { data } = await axios(request);
     return data as Response;
+  }
+
+  /**
+   * Handles the update log stream error by creating a log group if one does not already exist
+   *
+   * @param e error reported by the CreateLogStream API
+   * @param logStreamName name of the logstream to be used when the call to re-create is retried
+   */
+  private async handleUpdateLogStreamError(e: AxiosError, logStreamName: string) {
+    logError(e);
+    const exceptionType = e.response?.data.__type as CloudwatchException;
+
+    if (exceptionType === "ResourceNotFoundException") {
+      await this.createLogGroup();
+      return await this.updateLogStream(logStreamName);
+    }
+
+    if (exceptionType === "ResourceAlreadyExistsException") {
+      this.currentLogStream = logStreamName;
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Handles create log group errors to allow the metrics reporter to proceed safely.
+   *
+   * __TODO__: Add handling for the rest of the errors documented [here](https://docs.aws.amazon.com/AmazonCloudWatchLogs/latest/APIReference/API_CreateLogGroup.html#API_CreateLogGroup_Errors)
+   * @param e error reported by the CreateLogGroup API
+   */
+  private async handleCreateLogGroupError(e: AxiosError) {
+    logError(e);
+    const exceptionType = e.response?.data.__type as CloudwatchException;
+
+    if (exceptionType === "ResourceAlreadyExistsException") {
+      return true;
+    }
+
+    return false;
   }
 }
 
